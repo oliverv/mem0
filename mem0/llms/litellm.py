@@ -16,7 +16,7 @@ class LiteLLM(LLMBase):
         super().__init__(config)
 
         if not self.config.model:
-            self.config.model = "gpt-5-mini"
+            self.config.model = "gpt-4o-mini"
 
     def _parse_response(self, response, tools):
         """
@@ -67,7 +67,8 @@ class LiteLLM(LLMBase):
         Returns:
             str: The generated response.
         """
-        if not litellm.supports_function_calling(self.config.model):
+        # Only enforce function-calling support when tools are actually requested
+        if tools and not litellm.supports_function_calling(self.config.model):
             raise ValueError(f"Model '{self.config.model}' in litellm does not support function calling.")
 
         params = {
@@ -79,7 +80,7 @@ class LiteLLM(LLMBase):
         }
         if response_format:
             params["response_format"] = response_format
-        if tools:  # TODO: Remove tools if no issues found with new memory addition logic
+        if tools:
             params["tools"] = tools
             params["tool_choice"] = tool_choice
 
