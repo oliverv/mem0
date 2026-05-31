@@ -3,19 +3,19 @@ from typing import Dict, List, Optional
 
 from openai import OpenAI
 
-from mem0.configs.llms.base import BaseLlmConfig
+from mem0.configs.llms.xai import XAIConfig
 from mem0.llms.base import LLMBase
 
 
 class XAILLM(LLMBase):
-    def __init__(self, config: Optional[BaseLlmConfig] = None):
+    def __init__(self, config: Optional[XAIConfig] = None):
         super().__init__(config)
 
         if not self.config.model:
             self.config.model = "grok-2-latest"
 
         api_key = self.config.api_key or os.getenv("XAI_API_KEY")
-        base_url = self.config.xai_base_url or os.getenv("XAI_API_BASE") or "https://api.x.ai/v1"
+        base_url = getattr(self.config, "xai_base_url", None) or os.getenv("XAI_API_BASE") or "https://api.x.ai/v1"
         self.client = OpenAI(api_key=api_key, base_url=base_url)
 
     def generate_response(

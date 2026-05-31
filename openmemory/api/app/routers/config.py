@@ -15,6 +15,7 @@ class LLMConfig(BaseModel):
     max_tokens: int = Field(..., description="Maximum tokens to generate")
     api_key: Optional[str] = Field(None, description="API key or 'env:API_KEY' to use environment variable")
     ollama_base_url: Optional[str] = Field(None, description="Base URL for Ollama server (e.g., http://host.docker.internal:11434)")
+    xai_base_url: Optional[str] = Field(None, description="Base URL for xAI API (defaults to https://api.x.ai/v1)")
 
 class LLMProvider(BaseModel):
     provider: str = Field(..., description="LLM provider name")
@@ -151,10 +152,15 @@ async def update_configuration(config: ConfigSchema, db: Session = Depends(get_d
         if "openmemory" not in updated_config:
             updated_config["openmemory"] = {}
         updated_config["openmemory"].update(config.openmemory.dict(exclude_none=True))
-    
+
     # Update mem0 settings
-    updated_config["mem0"] = config.mem0.dict(exclude_none=True)
-    
+    if config.mem0 is not None:
+        updated_config["mem0"] = config.mem0.dict(exclude_none=True)
+
+    save_config_to_db(db, updated_config)
+    reset_memory_client()
+    return updated_config
+
 
 @router.patch("/", response_model=ConfigSchema)
 async def patch_configuration(config_update: ConfigSchema, db: Session = Depends(get_db)):

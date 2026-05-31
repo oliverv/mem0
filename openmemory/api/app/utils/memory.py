@@ -152,9 +152,20 @@ def _build_openai_llm_config(model, api_key, base_url, ollama_base_url):
     return config
 
 
+def _build_xai_llm_config(model, api_key, base_url, ollama_base_url):
+    config = {
+        "model": model or "grok-2-latest",
+        "api_key": api_key or "env:XAI_API_KEY",
+    }
+    if base_url:
+        config["xai_base_url"] = base_url
+    return config
+
+
 _LLM_CONFIG_FACTORIES = {
     "ollama": _build_ollama_llm_config,
     "openai": _build_openai_llm_config,
+    "xai": _build_xai_llm_config,
 }
 
 

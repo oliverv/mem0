@@ -101,6 +101,7 @@ export function FormView({ settings, onChange }: FormViewProps) {
   const needsEmbedderApiKey = settings.mem0?.embedder?.provider?.toLowerCase() !== "ollama"
   const isLlmOllama = settings.mem0?.llm?.provider?.toLowerCase() === "ollama"
   const isEmbedderOllama = settings.mem0?.embedder?.provider?.toLowerCase() === "ollama"
+  const isLlmXai = settings.mem0?.llm?.provider?.toLowerCase() === "xai"
 
   const LLM_PROVIDERS = {
     "OpenAI": "openai",
@@ -205,6 +206,21 @@ export function FormView({ settings, onChange }: FormViewProps) {
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Leave empty to use default: http://host.docker.internal:11434
+              </p>
+            </div>
+          )}
+
+          {isLlmXai && (
+            <div className="space-y-2">
+              <Label htmlFor="llm-xai-url">xAI Base URL</Label>
+              <Input
+                id="llm-xai-url"
+                placeholder="https://api.x.ai/v1"
+                value={settings.mem0?.llm?.config?.xai_base_url || ""}
+                onChange={(e) => handleLlmConfigChange("xai_base_url", e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Leave empty to use the default xAI endpoint: https://api.x.ai/v1
               </p>
             </div>
           )}
