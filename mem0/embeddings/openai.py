@@ -18,9 +18,10 @@ class OpenAIEmbedding(EmbeddingBase):
         self._pass_dimensions_to_api = self.config.embedding_dims is not None
         self.config.embedding_dims = self.config.embedding_dims or 1536
 
-        api_key = self.config.api_key or os.getenv("OPENAI_API_KEY")
+        api_key = self.config.api_key or os.getenv("EMBEDDER_API_KEY") or os.getenv("OPENAI_API_KEY")
         base_url = (
             self.config.openai_base_url
+            or os.getenv("EMBEDDER_BASE_URL")
             or os.getenv("OPENAI_API_BASE")
             or os.getenv("OPENAI_BASE_URL")
             or "https://api.openai.com/v1"

@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Dict, List, Optional
 
 try:
@@ -17,6 +18,10 @@ class LiteLLM(LLMBase):
 
         if not self.config.model:
             self.config.model = "gpt-4o-mini"
+
+        # api_key and api_base for the LiteLLM proxy
+        self._api_key = self.config.api_key or os.getenv("LLM_API_KEY")
+        self._api_base = getattr(self.config, "api_base", None) or os.getenv("LLM_BASE_URL")
 
     def _parse_response(self, response, tools):
         """
@@ -78,6 +83,10 @@ class LiteLLM(LLMBase):
             "max_tokens": self.config.max_tokens,
             "top_p": self.config.top_p,
         }
+        if self._api_key:
+            params["api_key"] = self._api_key
+        if self._api_base:
+            params["api_base"] = self._api_base
         if response_format:
             params["response_format"] = response_format
         if tools:

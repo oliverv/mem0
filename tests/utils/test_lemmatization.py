@@ -6,6 +6,7 @@ def _ensure_spacy():
     """Skip tests if spaCy model is not available."""
     try:
         import spacy
+
         spacy.load("en_core_web_sm")
     except Exception:
         pytest.skip("spaCy en_core_web_sm model not available")

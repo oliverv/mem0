@@ -123,6 +123,7 @@ class MilvusDB(VectorStoreBase):
             payloads (List[Dict], optional): List of payloads corresponding to vectors.
             ids (List[str], optional): List of IDs corresponding to vectors.
         """
+
         # Batch insert all records at once for better performance and consistency.
         # Only include the `text` field when the collection's schema has it — legacy
         # collections created pre-v3 reject unknown top-level fields.
@@ -130,7 +131,9 @@ class MilvusDB(VectorStoreBase):
             record = {"id": idx, "vectors": embedding, "metadata": metadata}
             if self._has_bm25_schema:
                 # Populate the text field for BM25 sparse search; prefer lemmatized text, fall back to raw data
-                record["text"] = (metadata.get("text_lemmatized") or metadata.get("data", ""))[:65535] if metadata else ""
+                record["text"] = (
+                    (metadata.get("text_lemmatized") or metadata.get("data", ""))[:65535] if metadata else ""
+                )
             return record
 
         data = [_build_record(idx, embedding, metadata) for idx, embedding, metadata in zip(ids, vectors, payloads)]

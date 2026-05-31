@@ -6,6 +6,7 @@ def _ensure_spacy():
     """Skip tests if spaCy model is not available."""
     try:
         import spacy
+
         spacy.load("en_core_web_sm")
     except Exception:
         pytest.skip("spaCy en_core_web_sm model not available")
@@ -33,8 +34,9 @@ class TestExtractEntities:
 
         entities = extract_entities("The machine learning engineer built a neural network")
         entity_texts = [e[1].lower() for e in entities]
-        has_compound = any("machine" in t and "learning" in t for t in entity_texts) or \
-                       any("neural" in t and "network" in t for t in entity_texts)
+        has_compound = any("machine" in t and "learning" in t for t in entity_texts) or any(
+            "neural" in t and "network" in t for t in entity_texts
+        )
         assert has_compound, f"Expected compound nouns, got {entities}"
 
     def test_empty_string(self):

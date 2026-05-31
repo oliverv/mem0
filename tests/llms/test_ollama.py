@@ -104,9 +104,7 @@ def test_generate_response_with_tools_string_arguments(mock_ollama_client):
     mock_response = {
         "message": {
             "content": "",
-            "tool_calls": [
-                {"function": {"name": "test_fn", "arguments": '{"key": "value"}'}}
-            ],
+            "tool_calls": [{"function": {"name": "test_fn", "arguments": '{"key": "value"}'}}],
         }
     }
     mock_ollama_client.chat.return_value = mock_response

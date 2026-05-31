@@ -15,7 +15,7 @@ class GoogleGenAIEmbedding(EmbeddingBase):
         self.config.model = self.config.model or "models/gemini-embedding-001"
         self.config.embedding_dims = self.config.embedding_dims or self.config.output_dimensionality or 768
 
-        api_key = self.config.api_key or os.getenv("GOOGLE_API_KEY")
+        api_key = self.config.api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
         self.client = genai.Client(api_key=api_key)
 

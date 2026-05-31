@@ -14,6 +14,7 @@ from mem0.memory.utils import extract_json, remove_code_blocks
 
 # --- Test extract_json ---
 
+
 class TestExtractJson:
     """Tests for extract_json utility."""
 
@@ -94,6 +95,7 @@ That's the result."""
 
 # --- Test remove_code_blocks ---
 
+
 class TestRemoveCodeBlocks:
     """Tests for remove_code_blocks — verify it does NOT handle chatty text."""
 
@@ -133,6 +135,7 @@ class TestRemoveCodeBlocks:
 
 
 # --- Test the full fallback chain (remove_code_blocks -> extract_json) ---
+
 
 class TestFallbackChain:
     """Tests the actual fallback pattern used in _add_to_vector_store:

@@ -9,6 +9,23 @@ services:
     volumes:
       - qdrant_data:/mem0/storage
 
+  postgres:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${PG_USER:-mem0}
+      - POSTGRES_PASSWORD=${PG_PASSWORD:-mem0}
+      - POSTGRES_DB=${PG_DB:-mem0}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-mem0} -d ${PG_DB:-mem0}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   openmemory-mcp:
     build:
       context: ..
@@ -16,11 +33,14 @@ services:
     env_file:
       - .env
     environment:
-      # Always hard-wire these so the API can find Qdrant
+      # Always hard-wire internal service addresses
       - QDRANT_HOST=mem0_store
       - QDRANT_PORT=6333
+      - PG_HOST=postgres
+      - PG_PORT=5432
     depends_on:
       - mem0_store
+      - postgres
     ports:
       - "8765:8765"
     volumes:
@@ -40,4 +60,5 @@ services:
 
 volumes:
   qdrant_data:
+  pg_data:
   openmemory_db:

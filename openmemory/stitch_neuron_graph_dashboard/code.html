@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>xAI Memory Gateway</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Geist:wght@100;300;400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;family=Space+Grotesk:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #000000;
+            color: #e5e1e4;
+            overflow: hidden;
+        }
+        .glass-panel {
+            background: rgba(18, 18, 20, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid #27272A;
+        }
+        .node-glow-cyan {
+            box-shadow: 0 0 15px rgba(0, 219, 233, 0.3);
+        }
+        .node-glow-purple {
+            box-shadow: 0 0 15px rgba(236, 178, 255, 0.3);
+        }
+        .data-river-line {
+            background: linear-gradient(90deg, transparent, #00dbe9, #cf5cff, transparent);
+            background-size: 200% 100%;
+            animation: flow 8s linear infinite;
+        }
+        @keyframes flow {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .perspective-grid {
+            perspective: 1000px;
+        }
+        .memory-card-cyan { border-top: 2px solid #00dbe9; }
+        .memory-card-purple { border-top: 2px solid #ecb2ff; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-dim": "#131315",
+                      "tertiary-fixed-dim": "#bec7d9",
+                      "on-surface-variant": "#b9cacb",
+                      "surface-container-lowest": "#0e0e10",
+                      "inverse-surface": "#e5e1e4",
+                      "surface-container": "#201f22",
+                      "on-tertiary-container": "#565f6f",
+                      "secondary": "#ecb2ff",
+                      "on-primary-container": "#006970",
+                      "on-tertiary-fixed-variant": "#3e4756",
+                      "on-tertiary": "#28313f",
+                      "primary-fixed": "#7df4ff",
+                      "on-secondary-fixed": "#320047",
+                      "on-secondary-container": "#480063",
+                      "background": "#131315",
+                      "on-surface": "#e5e1e4",
+                      "surface-tint": "#00dbe9",
+                      "primary": "#dbfcff",
+                      "on-primary-fixed": "#002022",
+                      "tertiary-fixed": "#dae3f5",
+                      "outline-variant": "#3b494b",
+                      "secondary-container": "#cf5cff",
+                      "tertiary-container": "#d1daec",
+                      "on-tertiary-fixed": "#131c29",
+                      "on-secondary": "#520071",
+                      "error": "#ffb4ab",
+                      "secondary-fixed-dim": "#ecb2ff",
+                      "surface": "#131315",
+                      "primary-container": "#00f0ff",
+                      "outline": "#849495",
+                      "on-secondary-fixed-variant": "#74009f",
+                      "on-error": "#690005",
+                      "inverse-on-surface": "#313032",
+                      "surface-container-high": "#2a2a2c",
+                      "surface-bright": "#39393b",
+                      "error-container": "#93000a",
+                      "on-primary-fixed-variant": "#004f54",
+                      "tertiary": "#f3f6ff",
+                      "inverse-primary": "#006970",
+                      "surface-container-low": "#1c1b1d",
+                      "on-error-container": "#ffdad6",
+                      "primary-fixed-dim": "#00dbe9",
+                      "surface-variant": "#353437",
+                      "on-primary": "#00363a",
+                      "secondary-fixed": "#f8d8ff",
+                      "on-background": "#e5e1e4",
+                      "surface-container-highest": "#353437"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "xxl": "64px",
+                      "margin-mobile": "16px",
+                      "gutter": "24px",
+                      "sm": "8px",
+                      "xl": "32px",
+                      "lg": "24px",
+                      "unit": "4px",
+                      "xs": "4px",
+                      "md": "16px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Space Grotesk"],
+                      "headline-md": ["Space Grotesk"],
+                      "body-lg": ["Geist"],
+                      "body-md": ["Geist"],
+                      "code-sm": ["JetBrains Mono"],
+                      "label-xs": ["JetBrains Mono"],
+                      "headline-lg": ["Space Grotesk"]
+              },
+              "fontSize": {
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "500"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "code-sm": ["14px", {"lineHeight": "20px", "fontWeight": "450"}],
+                      "label-xs": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="font-body-md text-on-surface bg-background min-h-screen">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-lg h-xxl bg-surface-dim/80 backdrop-blur-xl border-b border-outline-variant">
+<div class="flex items-center gap-lg">
+<span class="font-display-lg text-headline-md font-bold text-surface-tint">xAI Memory Gateway</span>
+<nav class="hidden md:flex gap-md ml-xl items-center">
+<a class="font-body-md text-body-md text-primary-fixed-dim border-b-2 border-surface-tint pb-1" href="#">Sync</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:bg-white/10 transition-colors px-2 py-1 rounded-lg" href="#">Model</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:bg-white/10 transition-colors px-2 py-1 rounded-lg" href="#">Savings</a>
+<span class="ml-md px-sm py-1 bg-surface-container-high rounded-full font-code-sm text-label-xs text-primary-fixed-dim border border-outline-variant">
+                    52% Token Savings
+                </span>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-white/10 p-2 rounded-full transition-all duration-150 scale-95" data-icon="notifications">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-white/10 p-2 rounded-full transition-all duration-150 scale-95" data-icon="settings">settings</button>
+<div class="w-8 h-8 rounded-full border border-outline overflow-hidden">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A professional headshot of a software architect with a focused expression, set against a dark, minimalist background with subtle blue rim lighting. The style is clean, modern, and high-fidelity, matching a futuristic tech environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWg-4KdZTNcRYkp3Q-tNT45sxzxtrlT6gqjfiYxoIAu5UZZxoA2JjIFRPg4Bot-l2sD4Q_viOzwT9Uk4F9pPe3sDSjdUXmNa_U8AFQ-4Xf-wYqSl8stpOy4CW3s9Om2OVBH6tx6uDp47_BiegzxT1Pgz6PT3BrTJLScTU-aXVWlpPDNI5XxtfsYVjyBdiS5NND1JnJpUfS-e5tzIywOGOnhJP7VXpIzy1vKD8cx_orUJZ0I0L2aBt7GxjoGCnQl3xbiGqLmIgzaXwe"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-xxl h-[calc(100vh-64px)] w-64 bg-surface-container-lowest border-r border-outline-variant flex flex-col z-40">
+<div class="p-lg">
+<div class="flex items-center gap-sm mb-xs">
+<div class="w-2 h-2 rounded-full bg-surface-tint animate-pulse"></div>
+<span class="font-headline-md text-headline-md text-primary">Memory Stack</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Permanent/Ephemeral</span>
+</div>
+<nav class="flex-1 px-sm">
+<ul class="space-y-1">
+<li>
+<a class="flex items-center gap-sm px-md py-3 bg-white/10 text-primary-fixed-dim border-l-2 border-surface-tint font-code-sm text-code-sm transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="segment">segment</span>
+                        Snippets
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-md py-3 text-on-surface-variant hover:bg-white/5 font-code-sm text-code-sm transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+                        Search
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-md py-3 text-on-surface-variant hover:bg-white/5 font-code-sm text-code-sm transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+                        Layers
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-md py-3 text-on-surface-variant hover:bg-white/5 font-code-sm text-code-sm transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+                        Telemetry
+                    </a>
+</li>
+</ul>
+</nav>
+<div class="p-lg">
+<button class="w-full py-sm border border-surface-tint text-surface-tint font-headline-md text-label-xs rounded-lg hover:bg-surface-tint/10 transition-colors uppercase tracking-wider">
+                Inject Memory
+            </button>
+</div>
+<div class="mt-auto border-t border-outline-variant px-sm py-md">
+<a class="flex items-center gap-sm px-md py-2 text-on-surface-variant hover:bg-white/5 font-code-sm text-code-sm transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-sm px-md py-2 text-on-surface-variant hover:bg-white/5 font-code-sm text-code-sm transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                Support
+            </a>
+</div>
+</aside>
+<!-- Main Workspace Canvas -->
+<main class="ml-64 mr-80 pt-xxl pb-xxl h-screen relative overflow-hidden bg-black">
+<!-- 3D Knowledge Graph Visualization -->
+<div class="absolute inset-0 z-0 opacity-40">
+<div class="data-river-line absolute h-[1px] w-full top-1/4 transform rotate-12"></div>
+<div class="data-river-line absolute h-[1px] w-full top-1/2 transform -rotate-6"></div>
+<div class="data-river-line absolute h-[1px] w-full top-3/4 transform rotate-3"></div>
+</div>
+<div class="relative w-full h-full flex items-center justify-center" id="knowledge-graph">
+<!-- Simulated Knowledge Nodes -->
+<div class="absolute top-[20%] left-[30%] animate-float" style="animation: float 6s ease-in-out infinite;">
+<div class="w-3 h-3 rounded-full bg-surface-tint node-glow-cyan"></div>
+<div class="absolute top-4 left-4 font-code-sm text-[10px] text-surface-tint whitespace-nowrap bg-black/50 px-1 rounded">0x7F4A2 (Permanent)</div>
+</div>
+<div class="absolute top-[45%] left-[20%] animate-float" style="animation: float 8s ease-in-out infinite 1s;">
+<div class="w-2 h-2 rounded-full bg-secondary node-glow-purple"></div>
+<div class="absolute top-3 left-3 font-code-sm text-[10px] text-secondary whitespace-nowrap bg-black/50 px-1 rounded">0x3B2C1 (Ephemeral)</div>
+</div>
+<div class="absolute top-[60%] left-[55%] animate-float" style="animation: float 7s ease-in-out infinite 0.5s;">
+<div class="w-4 h-4 rounded-full bg-surface-tint node-glow-cyan"></div>
+<div class="absolute top-5 left-5 font-code-sm text-[10px] text-surface-tint whitespace-nowrap bg-black/50 px-1 rounded">Core_Context_BGE (Permanent)</div>
+</div>
+<div class="absolute top-[30%] left-[70%] animate-float" style="animation: float 5s ease-in-out infinite 2s;">
+<div class="w-2 h-2 rounded-full bg-secondary node-glow-purple"></div>
+<div class="absolute top-3 left-3 font-code-sm text-[10px] text-secondary whitespace-nowrap bg-black/50 px-1 rounded">Session_Cache_4 (Ephemeral)</div>
+</div>
+<div class="absolute top-[80%] left-[40%] animate-float" style="animation: float 9s ease-in-out infinite 1.5s;">
+<div class="w-3 h-3 rounded-full bg-surface-tint node-glow-cyan"></div>
+<div class="absolute top-4 left-4 font-code-sm text-[10px] text-surface-tint whitespace-nowrap bg-black/50 px-1 rounded">User_Preferences (Permanent)</div>
+</div>
+<!-- Central Hub -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-32 h-32 rounded-full border border-surface-tint/30 flex items-center justify-center animate-spin-slow">
+<div class="w-24 h-24 rounded-full border border-surface-tint/50 flex items-center justify-center animate-spin-reverse-slow">
+<div class="w-16 h-16 rounded-full bg-surface-tint/20 backdrop-blur-md flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-tint text-4xl" data-icon="neurology">neurology</span>
+</div>
+</div>
+</div>
+<div class="mt-lg text-center">
+<h2 class="font-headline-md text-headline-md text-primary">Cognitive Nexus</h2>
+<p class="font-code-sm text-code-sm text-on-surface-variant opacity-60">Real-time vector synchronization active</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Right Panel (Memory Detail) -->
+<aside class="fixed right-0 top-xxl h-[calc(100vh-64px)] w-80 bg-surface-container-lowest border-l border-outline-variant flex flex-col z-40 glass-panel">
+<div class="p-lg border-b border-outline-variant">
+<h3 class="font-headline-md text-body-lg text-primary mb-xs">Memory Detail</h3>
+<div class="flex items-center gap-sm">
+<span class="px-2 py-0.5 bg-surface-tint/10 text-surface-tint font-code-sm text-[10px] border border-surface-tint/30 rounded uppercase tracking-tighter">Permanent</span>
+<span class="font-code-sm text-[10px] text-on-tertiary-container">ID: Frag_4429_X</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-lg space-y-lg">
+<!-- Fragment Content -->
+<section>
+<label class="font-code-sm text-label-xs text-on-surface-variant block mb-sm uppercase opacity-60">Content Fragment</label>
+<div class="bg-surface-container p-md rounded-lg border border-outline-variant/30 font-body-md text-body-md leading-relaxed text-on-surface">
+                    "The specific implementation of the transformer architecture for memory retrieval utilizes a cross-attention mechanism over cached KV pairs..."
+                </div>
+</section>
+<!-- Vector Status -->
+<section class="p-md rounded-lg bg-surface-container-low border-l-2 border-surface-tint memory-card-cyan">
+<label class="font-code-sm text-label-xs text-on-surface-variant block mb-xs uppercase opacity-60">Embedding Vector</label>
+<div class="flex justify-between items-center mb-sm">
+<span class="font-headline-md text-body-md text-surface-tint">BGE-M3 Sync</span>
+<span class="material-symbols-outlined text-surface-tint" data-icon="check_circle">check_circle</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="w-full h-full bg-surface-tint animate-pulse"></div>
+</div>
+<div class="mt-sm font-code-sm text-label-xs text-on-tertiary-container">Cosine Similarity: 0.9942</div>
+</section>
+<!-- Context Toggle -->
+<section class="p-md rounded-lg bg-surface-container border border-outline-variant">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-body-md text-body-md text-on-surface">Active Context Injection</span>
+<p class="font-code-sm text-[10px] text-on-surface-variant">Include in next inference cycle</p>
+</div>
+<button class="w-10 h-5 bg-surface-tint rounded-full relative transition-colors">
+<div class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div>
+</button>
+</div>
+</section>
+<!-- Visualization of related nodes -->
+<section>
+<label class="font-code-sm text-label-xs text-on-surface-variant block mb-sm uppercase opacity-60">Downstream Trace</label>
+<div class="space-y-sm">
+<div class="flex items-center gap-sm">
+<div class="w-1 h-10 border-l border-dashed border-outline-variant ml-2"></div>
+<div class="flex-1 p-sm bg-surface-container-low border border-outline-variant rounded flex items-center gap-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-code-sm text-code-sm truncate">Ephemeral_Prompt_Wrap...</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<div class="p-lg bg-surface-container-lowest mt-auto border-t border-outline-variant">
+<button class="w-full py-md bg-transparent border border-outline text-on-surface font-body-md text-body-md rounded hover:bg-white/5 transition-all">
+                Export Vector Data
+            </button>
+</div>
+</aside>
+<!-- Footer -->
+<footer class="fixed bottom-0 w-full z-50 flex justify-between items-center px-md py-xs bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex items-center gap-lg">
+<div class="flex items-center gap-sm">
+<span class="font-label-xs text-label-xs text-on-tertiary-container uppercase tracking-widest">Latency:</span>
+<span class="font-code-sm text-label-xs text-surface-tint">24ms</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="font-label-xs text-label-xs text-on-tertiary-container uppercase tracking-widest">Vector DB:</span>
+<span class="font-code-sm text-label-xs text-primary-fixed-dim">Healthy</span>
+</div>
+<div class="flex items-center gap-sm hidden md:flex">
+<span class="font-label-xs text-label-xs text-on-tertiary-container uppercase tracking-widest">Semantic Coverage:</span>
+<div class="w-16 h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="w-[88%] h-full bg-surface-tint"></div>
+</div>
+<span class="font-code-sm text-label-xs text-on-surface">88%</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<span class="font-label-xs text-label-xs text-on-tertiary-container">xAI Semantic Engine v2.4</span>
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+</div>
+</footer>
+<style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-20px) translateX(10px); }
+        }
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes spin-reverse-slow {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 20s linear infinite;
+        }
+        .animate-spin-reverse-slow {
+            animation: spin-reverse-slow 15s linear infinite;
+        }
+    </style>
+<script>
+        // Micro-interaction for memory node hover
+        document.querySelectorAll('.animate-float').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.transform = 'scale(1.5)';
+                node.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                node.style.zIndex = '20';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = 'scale(1)';
+                node.style.zIndex = '1';
+            });
+        });
+
+        // Toggle simulation
+        const toggleBtn = document.querySelector('aside .bg-surface-tint.rounded-full');
+        if(toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                const circle = toggleBtn.querySelector('div');
+                if(circle.classList.contains('right-1')) {
+                    circle.classList.remove('right-1');
+                    circle.classList.add('left-1');
+                    toggleBtn.classList.remove('bg-surface-tint');
+                    toggleBtn.classList.add('bg-surface-variant');
+                } else {
+                    circle.classList.add('right-1');
+                    circle.classList.remove('left-1');
+                    toggleBtn.classList.add('bg-surface-tint');
+                    toggleBtn.classList.remove('bg-surface-variant');
+                }
+            });
+        }
+    </script>
+</body></html>

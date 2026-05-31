@@ -19,6 +19,7 @@ logging.basicConfig(level=logging.INFO)
 
 _DRIVER_METADATA = DriverInfo(name="Mem0", version=version("mem0ai"))
 
+
 class OutputData(BaseModel):
     id: Optional[str]
     score: Optional[float]
@@ -113,7 +114,9 @@ class MongoDB(VectorStoreBase):
                         f"Text search index '{text_index_name}' created successfully for collection '{self.collection_name}'."
                     )
                 else:
-                    logger.info(f"Text search index '{text_index_name}' already exists in collection '{self.collection_name}'.")
+                    logger.info(
+                        f"Text search index '{text_index_name}' already exists in collection '{self.collection_name}'."
+                    )
             except Exception as e:
                 logger.warning(
                     f"Could not create text search index '{text_index_name}': {e}. "
@@ -247,8 +250,7 @@ class MongoDB(VectorStoreBase):
             logger.info(f"Keyword search completed. Found {len(results)} documents.")
 
             output = [
-                OutputData(id=str(doc["_id"]), score=doc.get("score"), payload=doc.get("payload"))
-                for doc in results
+                OutputData(id=str(doc["_id"]), score=doc.get("score"), payload=doc.get("payload")) for doc in results
             ]
             return output
         except Exception as e:

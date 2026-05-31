@@ -87,7 +87,6 @@ def test_generate_response_with_tools(mock_vllm_client):
     assert response["tool_calls"][0]["arguments"] == {"data": "Today is a sunny day."}
 
 
-
 def test_generate_response_with_response_format(mock_vllm_client):
     config = BaseLlmConfig(model="Qwen/Qwen2.5-32B-Instruct", temperature=0.7, max_tokens=100, top_p=1.0)
     llm = VllmLLM(config)
@@ -134,11 +133,12 @@ def test_generate_response_without_response_format(mock_vllm_client):
 
 def create_mocked_memory():
     """Create a fully mocked Memory instance for testing."""
-    with patch('mem0.utils.factory.LlmFactory.create') as mock_llm_factory, \
-         patch('mem0.utils.factory.EmbedderFactory.create') as mock_embedder_factory, \
-         patch('mem0.utils.factory.VectorStoreFactory.create') as mock_vector_factory, \
-         patch('mem0.memory.storage.SQLiteManager') as mock_sqlite:
-
+    with (
+        patch("mem0.utils.factory.LlmFactory.create") as mock_llm_factory,
+        patch("mem0.utils.factory.EmbedderFactory.create") as mock_embedder_factory,
+        patch("mem0.utils.factory.VectorStoreFactory.create") as mock_vector_factory,
+        patch("mem0.memory.storage.SQLiteManager") as mock_sqlite,
+    ):
         mock_llm = MagicMock()
         mock_llm_factory.return_value = mock_llm
 
@@ -164,11 +164,12 @@ def create_mocked_memory():
 
 def create_mocked_async_memory():
     """Create a fully mocked AsyncMemory instance for testing."""
-    with patch('mem0.utils.factory.LlmFactory.create') as mock_llm_factory, \
-         patch('mem0.utils.factory.EmbedderFactory.create') as mock_embedder_factory, \
-         patch('mem0.utils.factory.VectorStoreFactory.create') as mock_vector_factory, \
-         patch('mem0.memory.storage.SQLiteManager') as mock_sqlite:
-
+    with (
+        patch("mem0.utils.factory.LlmFactory.create") as mock_llm_factory,
+        patch("mem0.utils.factory.EmbedderFactory.create") as mock_embedder_factory,
+        patch("mem0.utils.factory.VectorStoreFactory.create") as mock_vector_factory,
+        patch("mem0.memory.storage.SQLiteManager") as mock_sqlite,
+    ):
         mock_llm = MagicMock()
         mock_llm_factory.return_value = mock_llm
 
@@ -204,16 +205,12 @@ def test_thinking_tags_sync():
     mock_vector_store.search.return_value = []
 
     result = memory._add_to_vector_store(
-        messages=[{"role": "user", "content": "I love sci-fi movies"}],
-        metadata={},
-        filters={},
-        infer=True
+        messages=[{"role": "user", "content": "I love sci-fi movies"}], metadata={}, filters={}, infer=True
     )
 
     assert len(result) == 1
     assert result[0]["memory"] == "Loves sci-fi"
     assert result[0]["event"] == "ADD"
-
 
 
 @pytest.mark.asyncio
@@ -230,19 +227,19 @@ async def test_async_thinking_tags_async():
     async def mock_to_thread(func, *args, **kwargs):
         if func == mock_llm.generate_response:
             return func(*args, **kwargs)
-        elif hasattr(func, '__name__') and 'embed' in func.__name__:
+        elif hasattr(func, "__name__") and "embed" in func.__name__:
             return [0.1, 0.2, 0.3]
-        elif hasattr(func, '__name__') and 'search' in func.__name__:
+        elif hasattr(func, "__name__") and "search" in func.__name__:
             return []
         else:
             return func(*args, **kwargs)
 
-    with patch('mem0.memory.main.asyncio.to_thread', side_effect=mock_to_thread):
+    with patch("mem0.memory.main.asyncio.to_thread", side_effect=mock_to_thread):
         result = await memory._add_to_vector_store(
             messages=[{"role": "user", "content": "I love sci-fi movies"}],
             metadata={},
             effective_filters={},
-            infer=True
+            infer=True,
         )
 
     assert len(result) == 1

@@ -5,9 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 try:
     from turbopuffer import Turbopuffer as TurbopufferClient
 except ImportError:
-    raise ImportError(
-        "Turbopuffer requires extra dependencies. Install with `pip install turbopuffer`"
-    ) from None
+    raise ImportError("Turbopuffer requires extra dependencies. Install with `pip install turbopuffer`") from None
 
 from pydantic import BaseModel
 
@@ -124,11 +122,13 @@ class TurbopufferDB(VectorStoreBase):
 
             score = 1 - dist if dist is not None else None
 
-            results.append(OutputData(
-                id=row_id,
-                score=score,
-                payload=row_dict,
-            ))
+            results.append(
+                OutputData(
+                    id=row_id,
+                    score=score,
+                    payload=row_dict,
+                )
+            )
         return results
 
     def _convert_filters(self, filters: Optional[Dict]):

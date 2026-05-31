@@ -81,9 +81,7 @@ class OllamaLLM(LLMBase):
                 if isinstance(arguments, str):
                     arguments = json.loads(extract_json(arguments))
 
-                processed_response["tool_calls"].append(
-                    {"name": name, "arguments": arguments}
-                )
+                processed_response["tool_calls"].append({"name": name, "arguments": arguments})
 
             return processed_response
         else:

@@ -90,10 +90,13 @@ class Qdrant(VectorStoreBase):
         if self._bm25_encoder is None:
             try:
                 from fastembed import SparseTextEmbedding
+
                 self._bm25_encoder = SparseTextEmbedding(model_name="Qdrant/bm25")
                 logger.info("BM25 encoder loaded (fastembed Qdrant/bm25)")
             except ImportError:
-                logger.warning("fastembed not installed — BM25 keyword search disabled. Install with: pip install fastembed")
+                logger.warning(
+                    "fastembed not installed — BM25 keyword search disabled. Install with: pip install fastembed"
+                )
                 self._bm25_encoder = False  # sentinel: tried and failed
             except Exception as e:
                 logger.warning(f"Failed to load BM25 encoder: {e}")
@@ -167,9 +170,7 @@ class Qdrant(VectorStoreBase):
         for field in common_fields:
             try:
                 self.client.create_payload_index(
-                    collection_name=self.collection_name,
-                    field_name=field,
-                    field_schema="keyword"
+                    collection_name=self.collection_name, field_name=field, field_schema="keyword"
                 )
                 logger.info(f"Created index for {field} in collection {self.collection_name}")
             except Exception as e:
@@ -216,10 +217,7 @@ class Qdrant(VectorStoreBase):
     @staticmethod
     def _is_datetime_range(range_kwargs: dict) -> bool:
         """Check if all values in range kwargs are ISO datetime strings."""
-        return all(
-            isinstance(v, str) and Qdrant._ISO_DATETIME_RE.match(v)
-            for v in range_kwargs.values()
-        )
+        return all(isinstance(v, str) and Qdrant._ISO_DATETIME_RE.match(v) for v in range_kwargs.values())
 
     def _build_field_condition(self, key: str, value) -> Optional[FieldCondition]:
         """
@@ -263,9 +261,7 @@ class Qdrant(VectorStoreBase):
                 try:
                     return FieldCondition(key=key, range=DatetimeRange(**range_kwargs))
                 except (ValueError, TypeError) as e:
-                    raise ValueError(
-                        f"Invalid datetime value in range filter for field '{key}': {e}"
-                    ) from e
+                    raise ValueError(f"Invalid datetime value in range filter for field '{key}': {e}") from e
             return FieldCondition(key=key, range=Range(**range_kwargs))
         elif "eq" in value:
             return FieldCondition(key=key, match=MatchValue(value=value["eq"]))
@@ -291,8 +287,7 @@ class Qdrant(VectorStoreBase):
         else:
             supported = {"eq", "ne", "gt", "gte", "lt", "lte", "in", "nin", "contains", "icontains"}
             raise ValueError(
-                f"Unsupported filter operator(s) for field '{key}': {ops}. "
-                f"Supported operators: {supported}"
+                f"Unsupported filter operator(s) for field '{key}': {ops}. " f"Supported operators: {supported}"
             )
 
     def _create_filter(self, filters: dict) -> Optional[Filter]:
@@ -332,8 +327,7 @@ class Qdrant(VectorStoreBase):
             if key in ("AND", "OR", "NOT"):
                 if not isinstance(value, list):
                     raise ValueError(
-                        f"{key} filter value must be a list of filter dicts, "
-                        f"got {type(value).__name__}"
+                        f"{key} filter value must be a list of filter dicts, " f"got {type(value).__name__}"
                     )
                 for i, item in enumerate(value):
                     if not isinstance(item, dict):
@@ -397,8 +391,7 @@ class Qdrant(VectorStoreBase):
         """Batch search using Qdrant's query_batch_points for efficiency."""
         query_filter = self._create_filter(filters) if filters else None
         requests = [
-            models.QueryRequest(query=vec, filter=query_filter, limit=top_k, with_payload=True)
-            for vec in vectors_list
+            models.QueryRequest(query=vec, filter=query_filter, limit=top_k, with_payload=True) for vec in vectors_list
         ]
         try:
             results = self.client.query_batch_points(

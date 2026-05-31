@@ -15,9 +15,7 @@ class TestLLMRerankerConfig:
         assert config.top_k is None
 
     def test_nested_llm_field_accepted(self):
-        config = LLMRerankerConfig(
-            llm={"provider": "ollama", "config": {"ollama_base_url": "http://localhost:11434"}}
-        )
+        config = LLMRerankerConfig(llm={"provider": "ollama", "config": {"ollama_base_url": "http://localhost:11434"}})
         assert config.llm["provider"] == "ollama"
         assert config.llm["config"]["ollama_base_url"] == "http://localhost:11434"
 

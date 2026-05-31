@@ -139,7 +139,9 @@ class Mem0Teachability(AgentCapability):
         return comment + self._concatenate_memo_texts(memo_list)
 
     def _retrieve_relevant_memos(self, input_text: str) -> list:
-        search_results = self.memory.search(input_text, filters={"agent_id": self.agent_id}, top_k=self.max_num_retrievals)
+        search_results = self.memory.search(
+            input_text, filters={"agent_id": self.agent_id}, top_k=self.max_num_retrievals
+        )
         memo_list = [result["memory"] for result in search_results if result["score"] <= self.recall_threshold]
 
         if self.verbosity >= 1 and not memo_list:

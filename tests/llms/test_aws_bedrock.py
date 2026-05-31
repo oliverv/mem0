@@ -11,6 +11,7 @@ from mem0.utils.factory import LlmFactory
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mock_boto3():
     """Patch boto3 so no real AWS calls are made during unit tests."""
@@ -43,6 +44,7 @@ def _converse_response(text: str = "ok") -> dict:
 # extract_provider
 # ---------------------------------------------------------------------------
 
+
 class TestExtractProvider:
     def test_standard_anthropic_model(self):
         assert extract_provider("anthropic.claude-3-5-sonnet-20240620-v1:0") == "anthropic"
@@ -74,6 +76,7 @@ class TestExtractProvider:
 # ---------------------------------------------------------------------------
 # AWSBedrockConfig
 # ---------------------------------------------------------------------------
+
 
 class TestAWSBedrockConfig:
     def test_top_p_defaults_to_none(self):
@@ -119,6 +122,7 @@ class TestAWSBedrockConfig:
 # LlmFactory
 # ---------------------------------------------------------------------------
 
+
 class TestLlmFactory:
     def test_aws_bedrock_uses_aws_bedrock_config(self):
         _, config_class = LlmFactory.provider_to_class["aws_bedrock"]
@@ -150,6 +154,7 @@ class TestLlmFactory:
 # ---------------------------------------------------------------------------
 # _build_inference_config
 # ---------------------------------------------------------------------------
+
 
 class TestBuildInferenceConfig:
     """
@@ -353,6 +358,7 @@ class TestGenerateResponseConverse:
 # MiniMax provider
 # ---------------------------------------------------------------------------
 
+
 class TestMiniMaxProvider:
     """Tests for MiniMax models via Bedrock Converse API."""
 
@@ -410,10 +416,12 @@ class TestMiniMaxProvider:
         mock_boto3.converse.return_value = _converse_response('{"facts": ["test"]}')
         llm = _make_llm("minimax.minimax-m2.5", mock_boto3)
 
-        llm.generate_response([
-            {"role": "system", "content": "Return JSON only."},
-            {"role": "user", "content": "Extract facts from: test"},
-        ])
+        llm.generate_response(
+            [
+                {"role": "system", "content": "Return JSON only."},
+                {"role": "user", "content": "Extract facts from: test"},
+            ]
+        )
 
         _, kwargs = mock_boto3.converse.call_args
         # system prompt must be in top-level "system" key

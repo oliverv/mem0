@@ -42,9 +42,7 @@ def test_update_with_none_vector_preserves_embedding():
     mock_index.load.assert_called_once()
     call_kwargs = mock_index.load.call_args
     data_dict = call_kwargs[1]["data"][0] if "data" in call_kwargs[1] else call_kwargs[0][0][0]
-    assert "embedding" not in data_dict, (
-        "embedding should not be in data when vector is None"
-    )
+    assert "embedding" not in data_dict, "embedding should not be in data when vector is None"
     assert data_dict["memory_id"] == "test_id"
 
 
@@ -66,8 +64,6 @@ def test_update_with_vector_includes_embedding():
     mock_index.load.assert_called_once()
     call_kwargs = mock_index.load.call_args
     data_dict = call_kwargs[1]["data"][0] if "data" in call_kwargs[1] else call_kwargs[0][0][0]
-    assert "embedding" in data_dict, (
-        "embedding should be in data when vector is provided"
-    )
+    assert "embedding" in data_dict, "embedding should be in data when vector is provided"
     expected_bytes = np.array(vector, dtype=np.float32).tobytes()
     assert data_dict["embedding"] == expected_bytes

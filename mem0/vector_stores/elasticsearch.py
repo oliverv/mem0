@@ -32,7 +32,7 @@ class ElasticsearchDB(VectorStoreBase):
                 api_key=config.api_key,
                 verify_certs=config.verify_certs,
                 ca_certs=config.ca_certs,
-                headers= config.headers or {},
+                headers=config.headers or {},
             )
         else:
             self.client = Elasticsearch(
@@ -40,7 +40,7 @@ class ElasticsearchDB(VectorStoreBase):
                 basic_auth=(config.user, config.password) if (config.user and config.password) else None,
                 verify_certs=config.verify_certs,
                 ca_certs=config.ca_certs,
-                headers= config.headers or {},
+                headers=config.headers or {},
             )
 
         self.collection_name = config.collection_name

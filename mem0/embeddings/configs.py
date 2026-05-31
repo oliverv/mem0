@@ -19,6 +19,7 @@ class EmbedderConfig(BaseModel):
             "huggingface",
             "azure_openai",
             "gemini",
+            "google",  # alias for gemini
             "vertexai",
             "together",
             "lmstudio",

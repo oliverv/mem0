@@ -19,9 +19,7 @@ def mock_minimax_client():
 
 def test_minimax_llm_default_base_url():
     """Default config uses MiniMax official base URL."""
-    config = BaseLlmConfig(
-        model="MiniMax-M2.7", temperature=0.7, max_tokens=100, top_p=1.0, api_key="api_key"
-    )
+    config = BaseLlmConfig(model="MiniMax-M2.7", temperature=0.7, max_tokens=100, top_p=1.0, api_key="api_key")
     llm = MiniMaxLLM(config)
     # OpenAI client may normalize URL with trailing slash
     assert str(llm.client.base_url).rstrip("/") == "https://api.minimax.io/v1"
@@ -86,9 +84,7 @@ def test_minimax_llm_env_api_key():
 
 def test_generate_response_without_tools(mock_minimax_client):
     """generate_response returns text when no tools provided."""
-    config = BaseLlmConfig(
-        model="MiniMax-M2.7", temperature=0.7, max_tokens=100, top_p=1.0, api_key="api_key"
-    )
+    config = BaseLlmConfig(model="MiniMax-M2.7", temperature=0.7, max_tokens=100, top_p=1.0, api_key="api_key")
     llm = MiniMaxLLM(config)
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
@@ -109,9 +105,7 @@ def test_generate_response_without_tools(mock_minimax_client):
 
 def test_generate_response_with_tools(mock_minimax_client):
     """generate_response returns tool_calls when tools provided."""
-    config = BaseLlmConfig(
-        model="MiniMax-M2.7", temperature=0.7, max_tokens=100, top_p=1.0, api_key="api_key"
-    )
+    config = BaseLlmConfig(model="MiniMax-M2.7", temperature=0.7, max_tokens=100, top_p=1.0, api_key="api_key")
     llm = MiniMaxLLM(config)
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
@@ -164,9 +158,7 @@ def test_generate_response_with_tools(mock_minimax_client):
 
 def test_generate_response_with_response_format(mock_minimax_client):
     """generate_response passes response_format to the API."""
-    config = BaseLlmConfig(
-        model="MiniMax-M2.7", temperature=0.7, max_tokens=100, top_p=1.0, api_key="api_key"
-    )
+    config = BaseLlmConfig(model="MiniMax-M2.7", temperature=0.7, max_tokens=100, top_p=1.0, api_key="api_key")
     llm = MiniMaxLLM(config)
     messages = [{"role": "user", "content": "Return JSON."}]
     response_format = {"type": "json_object"}

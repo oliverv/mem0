@@ -24,6 +24,7 @@ from fastapi.testclient import TestClient
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def _mock_memory():
     """Patch Memory.from_config so the server imports without a real backend."""
@@ -59,6 +60,7 @@ def _load_app(env_overrides: dict):
 # Auth disabled (ADMIN_API_KEY not set)
 # ---------------------------------------------------------------------------
 
+
 class TestAuthDisabled:
     """All endpoints should be freely accessible when ADMIN_API_KEY is empty."""
 
@@ -83,10 +85,13 @@ class TestAuthDisabled:
         assert resp.status_code == 200
 
     def test_create_memory_without_key(self):
-        resp = self.client.post("/memories", json={
-            "messages": [{"role": "user", "content": "I like pizza"}],
-            "user_id": "alice",
-        })
+        resp = self.client.post(
+            "/memories",
+            json={
+                "messages": [{"role": "user", "content": "I like pizza"}],
+                "user_id": "alice",
+            },
+        )
         assert resp.status_code == 200
 
     def test_search_without_key(self):
@@ -120,9 +125,7 @@ class TestAuthDisabled:
 
     def test_supplying_key_still_works_when_auth_disabled(self):
         """A client that sends X-API-Key should not be penalized when auth is off."""
-        resp = self.client.get(
-            "/memories/mem-1", headers={"X-API-Key": "some-random-key"}
-        )
+        resp = self.client.get("/memories/mem-1", headers={"X-API-Key": "some-random-key"})
         assert resp.status_code == 200
 
     @pytest.mark.parametrize(
@@ -148,6 +151,7 @@ class TestAuthDisabled:
 # ---------------------------------------------------------------------------
 # Auth enabled (ADMIN_API_KEY set)
 # ---------------------------------------------------------------------------
+
 
 class TestAuthEnabled:
     """All protected endpoints must enforce the API key."""
@@ -263,10 +267,14 @@ class TestAuthEnabled:
         assert resp.status_code == 200
 
     def test_create_memory_with_key(self):
-        resp = self._authed("POST", "/memories", json={
-            "messages": [{"role": "user", "content": "I like pizza"}],
-            "user_id": "alice",
-        })
+        resp = self._authed(
+            "POST",
+            "/memories",
+            json={
+                "messages": [{"role": "user", "content": "I like pizza"}],
+                "user_id": "alice",
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert "results" in data
@@ -304,6 +312,7 @@ class TestAuthEnabled:
 # Full CRUD flow through auth
 # ---------------------------------------------------------------------------
 
+
 class TestAuthenticatedCRUDFlow:
     """Verify a complete create → read → search → update → history → delete
     cycle works end-to-end through the auth layer."""
@@ -323,10 +332,14 @@ class TestAuthenticatedCRUDFlow:
 
     def test_full_crud_cycle(self):
         # 1. Create
-        resp = self._authed("POST", "/memories", json={
-            "messages": [{"role": "user", "content": "I love fresh vegetable pizza"}],
-            "user_id": "alice",
-        })
+        resp = self._authed(
+            "POST",
+            "/memories",
+            json={
+                "messages": [{"role": "user", "content": "I love fresh vegetable pizza"}],
+                "user_id": "alice",
+            },
+        )
         assert resp.status_code == 200
         self.mock.add.assert_called_once()
 
@@ -368,9 +381,7 @@ class TestAuthenticatedCRUDFlow:
     def test_crud_flow_blocked_without_auth(self):
         """Same flow should fail at every step without the key."""
         endpoints = [
-            ("POST", "/memories", {"json": {
-                "messages": [{"role": "user", "content": "test"}], "user_id": "alice"
-            }}),
+            ("POST", "/memories", {"json": {"messages": [{"role": "user", "content": "test"}], "user_id": "alice"}}),
             ("GET", "/memories/mem-1", {}),
             ("GET", "/memories", {"params": {"user_id": "alice"}}),
             ("POST", "/search", {"json": {"query": "pizza", "user_id": "alice"}}),
@@ -397,6 +408,7 @@ class TestAuthenticatedCRUDFlow:
 # ---------------------------------------------------------------------------
 # Edge cases
 # ---------------------------------------------------------------------------
+
 
 class TestAuthEdgeCases:
     """Boundary conditions and unusual inputs."""
@@ -428,6 +440,7 @@ class TestAuthEdgeCases:
     def test_key_env_var_not_present_at_all(self):
         """When the env var is completely absent, auth should be disabled."""
         import server.main as server_main
+
         env = os.environ.copy()
         env.pop("ADMIN_API_KEY", None)
         with patch.dict(os.environ, env, clear=True):
@@ -472,6 +485,7 @@ class TestAuthEdgeCases:
 # ---------------------------------------------------------------------------
 # Startup logging
 # ---------------------------------------------------------------------------
+
 
 class TestStartupLogging:
     """Verify the server emits the correct log messages at import time."""

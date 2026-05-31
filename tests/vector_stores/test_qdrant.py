@@ -108,9 +108,7 @@ class TestQdrant(unittest.TestCase):
         """Test search with agent_id and run_id filters."""
         vectors = [[0.1, 0.2]]
         mock_point = MagicMock(
-            id=str(uuid.uuid4()), 
-            score=0.95, 
-            payload={"user_id": "alice", "agent_id": "agent1", "run_id": "run1"}
+            id=str(uuid.uuid4()), score=0.95, payload={"user_id": "alice", "agent_id": "agent1", "run_id": "run1"}
         )
         self.client_mock.query_points.return_value = MagicMock(points=[mock_point])
 
@@ -123,7 +121,7 @@ class TestQdrant(unittest.TestCase):
         self.assertEqual(call_args["collection_name"], "test_collection")
         self.assertEqual(call_args["query"], vectors)
         self.assertEqual(call_args["limit"], 1)
-        
+
         # Verify that a Filter object was created
         query_filter = call_args["query_filter"]
         self.assertIsInstance(query_filter, Filter)
@@ -137,11 +135,7 @@ class TestQdrant(unittest.TestCase):
     def test_search_with_single_filter(self):
         """Test search with single filter."""
         vectors = [[0.1, 0.2]]
-        mock_point = MagicMock(
-            id=str(uuid.uuid4()), 
-            score=0.95, 
-            payload={"user_id": "alice"}
-        )
+        mock_point = MagicMock(id=str(uuid.uuid4()), score=0.95, payload={"user_id": "alice"})
         self.client_mock.query_points.return_value = MagicMock(points=[mock_point])
 
         filters = {"user_id": "alice"}
@@ -173,10 +167,10 @@ class TestQdrant(unittest.TestCase):
         """Test _create_filter with multiple filters."""
         filters = {"user_id": "alice", "agent_id": "agent1", "run_id": "run1"}
         result = self.qdrant._create_filter(filters)
-        
+
         self.assertIsInstance(result, Filter)
         self.assertEqual(len(result.must), 3)
-        
+
         # Check that all conditions are present
         conditions = [cond.key for cond in result.must]
         self.assertIn("user_id", conditions)
@@ -187,7 +181,7 @@ class TestQdrant(unittest.TestCase):
         """Test _create_filter with single filter."""
         filters = {"user_id": "alice"}
         result = self.qdrant._create_filter(filters)
-        
+
         self.assertIsInstance(result, Filter)
         self.assertEqual(len(result.must), 1)
         self.assertEqual(result.must[0].key, "user_id")
@@ -197,7 +191,7 @@ class TestQdrant(unittest.TestCase):
         """Test _create_filter with no filters."""
         result = self.qdrant._create_filter(None)
         self.assertIsNone(result)
-        
+
         result = self.qdrant._create_filter({})
         self.assertIsNone(result)
 
@@ -205,17 +199,17 @@ class TestQdrant(unittest.TestCase):
         """Test _create_filter with range values."""
         filters = {"user_id": "alice", "count": {"gte": 5, "lte": 10}}
         result = self.qdrant._create_filter(filters)
-        
+
         self.assertIsInstance(result, Filter)
         self.assertEqual(len(result.must), 2)
-        
+
         # Check that range condition is created
-        range_conditions = [cond for cond in result.must if hasattr(cond, 'range') and cond.range is not None]
+        range_conditions = [cond for cond in result.must if hasattr(cond, "range") and cond.range is not None]
         self.assertEqual(len(range_conditions), 1)
         self.assertEqual(range_conditions[0].key, "count")
-        
+
         # Check that string condition is created
-        string_conditions = [cond for cond in result.must if hasattr(cond, 'match') and cond.match is not None]
+        string_conditions = [cond for cond in result.must if hasattr(cond, "match") and cond.match is not None]
         self.assertEqual(len(string_conditions), 1)
         self.assertEqual(string_conditions[0].key, "user_id")
 
@@ -300,9 +294,7 @@ class TestQdrant(unittest.TestCase):
     def test_list_with_filters(self):
         """Test list with agent_id and run_id filters."""
         mock_point = MagicMock(
-            id=str(uuid.uuid4()), 
-            score=0.95, 
-            payload={"user_id": "alice", "agent_id": "agent1", "run_id": "run1"}
+            id=str(uuid.uuid4()), score=0.95, payload={"user_id": "alice", "agent_id": "agent1", "run_id": "run1"}
         )
         self.client_mock.scroll.return_value = [mock_point]
 
@@ -314,7 +306,7 @@ class TestQdrant(unittest.TestCase):
         call_args = self.client_mock.scroll.call_args[1]
         self.assertEqual(call_args["collection_name"], "test_collection")
         self.assertEqual(call_args["limit"], 10)
-        
+
         # Verify that a Filter object was created
         scroll_filter = call_args["scroll_filter"]
         self.assertIsInstance(scroll_filter, Filter)
@@ -328,11 +320,7 @@ class TestQdrant(unittest.TestCase):
 
     def test_list_with_single_filter(self):
         """Test list with single filter."""
-        mock_point = MagicMock(
-            id=str(uuid.uuid4()), 
-            score=0.95, 
-            payload={"user_id": "alice"}
-        )
+        mock_point = MagicMock(id=str(uuid.uuid4()), score=0.95, payload={"user_id": "alice"})
         self.client_mock.scroll.return_value = [mock_point]
 
         filters = {"user_id": "alice"}
@@ -669,18 +657,9 @@ class TestQdrantEnhancedFilters(unittest.TestCase):
         """3-level nesting: AND > OR > NOT."""
         filters = {
             "AND": [
-                {
-                    "OR": [
-                        {"category": "work"},
-                        {"category": "personal"}
-                    ]
-                },
+                {"OR": [{"category": "work"}, {"category": "personal"}]},
                 {"priority": {"gte": 5}},
-                {
-                    "NOT": [
-                        {"status": "archived"}
-                    ]
-                }
+                {"NOT": [{"status": "archived"}]},
             ]
         }
         result = self.qdrant._create_filter(filters)
@@ -713,9 +692,7 @@ class TestQdrantEnhancedFilters(unittest.TestCase):
 
     def test_wildcard_inside_and(self):
         """Wildcard inside AND should be skipped, other conditions preserved."""
-        result = self.qdrant._create_filter({
-            "AND": [{"category": "*"}, {"user_id": "alice"}]
-        })
+        result = self.qdrant._create_filter({"AND": [{"category": "*"}, {"user_id": "alice"}]})
         self.assertIsInstance(result, Filter)
         # AND produces nested Filters; the wildcard sub-filter returns None and is skipped
         # Only the user_id sub-filter remains
@@ -849,32 +826,24 @@ class TestQdrantDatetimeRangeFilters(unittest.TestCase):
 
     def test_iso_date_only_uses_datetime_range(self):
         """Date-only strings (YYYY-MM-DD) should also use DatetimeRange."""
-        cond = self.qdrant._build_field_condition(
-            "created_at", {"gte": "2025-01-01", "lt": "2025-02-01"}
-        )
+        cond = self.qdrant._build_field_condition("created_at", {"gte": "2025-01-01", "lt": "2025-02-01"})
         self.assertIsInstance(cond.range, DatetimeRange)
 
     def test_iso_datetime_with_offset_uses_datetime_range(self):
         """Datetime with timezone offset should use DatetimeRange."""
-        cond = self.qdrant._build_field_condition(
-            "updated_at", {"gt": "2025-06-15T10:30:00+05:30"}
-        )
+        cond = self.qdrant._build_field_condition("updated_at", {"gt": "2025-06-15T10:30:00+05:30"})
         self.assertIsInstance(cond.range, DatetimeRange)
 
     def test_numeric_range_still_uses_range(self):
         """Numeric values should still use Range (not DatetimeRange)."""
-        cond = self.qdrant._build_field_condition(
-            "priority", {"gte": 5, "lte": 10}
-        )
+        cond = self.qdrant._build_field_condition("priority", {"gte": 5, "lte": 10})
         self.assertIsInstance(cond.range, Range)
         self.assertEqual(cond.range.gte, 5)
         self.assertEqual(cond.range.lte, 10)
 
     def test_float_range_still_uses_range(self):
         """Float values should still use Range."""
-        cond = self.qdrant._build_field_condition(
-            "score", {"gt": 0.5, "lt": 0.9}
-        )
+        cond = self.qdrant._build_field_condition("score", {"gt": 0.5, "lt": 0.9})
         self.assertIsInstance(cond.range, Range)
 
     def test_datetime_range_via_create_filter(self):
@@ -889,9 +858,7 @@ class TestQdrantDatetimeRangeFilters(unittest.TestCase):
     def test_malformed_datetime_raises_with_field_context(self):
         """Malformed date-like string should raise ValueError with field name."""
         with self.assertRaises(ValueError) as ctx:
-            self.qdrant._build_field_condition(
-                "created_at", {"gte": "2025-13-45"}
-            )
+            self.qdrant._build_field_condition("created_at", {"gte": "2025-13-45"})
         self.assertIn("created_at", str(ctx.exception))
 
     def test_mixed_datetime_and_numeric_raises_error(self):
@@ -903,30 +870,26 @@ class TestQdrantDatetimeRangeFilters(unittest.TestCase):
         from pydantic import ValidationError
 
         with self.assertRaises(ValidationError):
-            self.qdrant._build_field_condition(
-                "field", {"gte": "2025-01-01", "lte": 100}
-            )
+            self.qdrant._build_field_condition("field", {"gte": "2025-01-01", "lte": 100})
 
     def test_iso_datetime_with_fractional_seconds(self):
         """Fractional seconds should use DatetimeRange."""
-        cond = self.qdrant._build_field_condition(
-            "created_at", {"gte": "2025-01-01T00:00:00.123456Z"}
-        )
+        cond = self.qdrant._build_field_condition("created_at", {"gte": "2025-01-01T00:00:00.123456Z"})
         self.assertIsInstance(cond.range, DatetimeRange)
 
     def test_iso_datetime_space_separated(self):
         """Space-separated datetime should use DatetimeRange."""
-        cond = self.qdrant._build_field_condition(
-            "created_at", {"gte": "2025-01-01 10:30:00"}
-        )
+        cond = self.qdrant._build_field_condition("created_at", {"gte": "2025-01-01 10:30:00"})
         self.assertIsInstance(cond.range, DatetimeRange)
 
     def test_datetime_with_numeric_mixed_filters(self):
         """Datetime and numeric range filters can coexist in same query."""
-        result = self.qdrant._create_filter({
-            "created_at": {"gte": "2025-01-01"},
-            "priority": {"gte": 5},
-        })
+        result = self.qdrant._create_filter(
+            {
+                "created_at": {"gte": "2025-01-01"},
+                "priority": {"gte": 5},
+            }
+        )
         self.assertIsInstance(result, Filter)
         self.assertEqual(len(result.must), 2)
         types = {type(c.range) for c in result.must}

@@ -162,11 +162,7 @@ class UpstashVector(VectorStoreBase):
             List[OutputData]: Search results, or None if sparse/BM25 search is not supported.
         """
         try:
-            filters_str = (
-                " AND ".join([f"{k} = {self._stringify(v)}" for k, v in filters.items()])
-                if filters
-                else None
-            )
+            filters_str = " AND ".join([f"{k} = {self._stringify(v)}" for k, v in filters.items()]) if filters else None
 
             response = self.client.query(
                 data=query,

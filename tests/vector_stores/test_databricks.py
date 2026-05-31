@@ -297,18 +297,20 @@ def test_update_vector(db_instance_direct, mock_workspace_client):
 
 def test_get_vector(db_instance_delta, mock_workspace_client):
     mock_workspace_client.vector_search_indexes.query_index.return_value = QueryVectorIndexResponse(
-        manifest=ResultManifest(columns=[
-            ColumnInfo(name="memory_id"),
-            ColumnInfo(name="hash"),
-            ColumnInfo(name="agent_id"),
-            ColumnInfo(name="run_id"),
-            ColumnInfo(name="user_id"),
-            ColumnInfo(name="memory"),
-            ColumnInfo(name="metadata"),
-            ColumnInfo(name="created_at"),
-            ColumnInfo(name="updated_at"),
-            ColumnInfo(name="score"),
-        ]),
+        manifest=ResultManifest(
+            columns=[
+                ColumnInfo(name="memory_id"),
+                ColumnInfo(name="hash"),
+                ColumnInfo(name="agent_id"),
+                ColumnInfo(name="run_id"),
+                ColumnInfo(name="user_id"),
+                ColumnInfo(name="memory"),
+                ColumnInfo(name="metadata"),
+                ColumnInfo(name="created_at"),
+                ColumnInfo(name="updated_at"),
+                ColumnInfo(name="score"),
+            ]
+        ),
         result=ResultData(
             data_array=[
                 [
@@ -324,7 +326,7 @@ def test_get_vector(db_instance_delta, mock_workspace_client):
                     "0.99",
                 ]
             ]
-        )
+        ),
     )
     res = db_instance_delta.get("id-get")
     assert res.id == "id-get"
@@ -339,19 +341,21 @@ def test_get_vector(db_instance_delta, mock_workspace_client):
 def test_get_vector_direct_access(db_instance_direct, mock_workspace_client):
     """get() on a DIRECT_ACCESS index must use query_vector instead of query_text."""
     mock_workspace_client.vector_search_indexes.query_index.return_value = QueryVectorIndexResponse(
-        manifest=ResultManifest(columns=[
-            ColumnInfo(name="memory_id"),
-            ColumnInfo(name="hash"),
-            ColumnInfo(name="agent_id"),
-            ColumnInfo(name="run_id"),
-            ColumnInfo(name="user_id"),
-            ColumnInfo(name="memory"),
-            ColumnInfo(name="metadata"),
-            ColumnInfo(name="created_at"),
-            ColumnInfo(name="updated_at"),
-            ColumnInfo(name="embedding"),
-            ColumnInfo(name="score"),
-        ]),
+        manifest=ResultManifest(
+            columns=[
+                ColumnInfo(name="memory_id"),
+                ColumnInfo(name="hash"),
+                ColumnInfo(name="agent_id"),
+                ColumnInfo(name="run_id"),
+                ColumnInfo(name="user_id"),
+                ColumnInfo(name="memory"),
+                ColumnInfo(name="metadata"),
+                ColumnInfo(name="created_at"),
+                ColumnInfo(name="updated_at"),
+                ColumnInfo(name="embedding"),
+                ColumnInfo(name="score"),
+            ]
+        ),
         result=ResultData(
             data_array=[
                 [
@@ -368,7 +372,7 @@ def test_get_vector_direct_access(db_instance_direct, mock_workspace_client):
                     "0.88",
                 ]
             ]
-        )
+        ),
     )
     res = db_instance_direct.get("id-get-da")
     assert res.id == "id-get-da"
@@ -400,18 +404,20 @@ def test_col_info(db_instance_delta):
 
 def test_list_memories(db_instance_delta, mock_workspace_client):
     mock_workspace_client.vector_search_indexes.query_index.return_value = QueryVectorIndexResponse(
-        manifest=ResultManifest(columns=[
-            ColumnInfo(name="memory_id"),
-            ColumnInfo(name="hash"),
-            ColumnInfo(name="agent_id"),
-            ColumnInfo(name="run_id"),
-            ColumnInfo(name="user_id"),
-            ColumnInfo(name="memory"),
-            ColumnInfo(name="metadata"),
-            ColumnInfo(name="created_at"),
-            ColumnInfo(name="updated_at"),
-            ColumnInfo(name="score"),
-        ]),
+        manifest=ResultManifest(
+            columns=[
+                ColumnInfo(name="memory_id"),
+                ColumnInfo(name="hash"),
+                ColumnInfo(name="agent_id"),
+                ColumnInfo(name="run_id"),
+                ColumnInfo(name="user_id"),
+                ColumnInfo(name="memory"),
+                ColumnInfo(name="metadata"),
+                ColumnInfo(name="created_at"),
+                ColumnInfo(name="updated_at"),
+                ColumnInfo(name="score"),
+            ]
+        ),
         result=ResultData(
             data_array=[
                 [
@@ -427,7 +433,7 @@ def test_list_memories(db_instance_delta, mock_workspace_client):
                     "0.99",
                 ]
             ]
-        )
+        ),
     )
     res = db_instance_delta.list(top_k=1)
     assert isinstance(res, list)
@@ -487,13 +493,19 @@ def test_get_vector_delta_sync_self_managed(mock_workspace_client):
         # NOTE: no embedding_model_endpoint_name
     )
     mock_workspace_client.vector_search_indexes.query_index.return_value = QueryVectorIndexResponse(
-        manifest=ResultManifest(columns=[
-            ColumnInfo(name="memory_id"), ColumnInfo(name="hash"),
-            ColumnInfo(name="agent_id"), ColumnInfo(name="run_id"),
-            ColumnInfo(name="user_id"), ColumnInfo(name="memory"),
-            ColumnInfo(name="metadata"), ColumnInfo(name="created_at"),
-            ColumnInfo(name="updated_at"),
-        ]),
+        manifest=ResultManifest(
+            columns=[
+                ColumnInfo(name="memory_id"),
+                ColumnInfo(name="hash"),
+                ColumnInfo(name="agent_id"),
+                ColumnInfo(name="run_id"),
+                ColumnInfo(name="user_id"),
+                ColumnInfo(name="memory"),
+                ColumnInfo(name="metadata"),
+                ColumnInfo(name="created_at"),
+                ColumnInfo(name="updated_at"),
+            ]
+        ),
         result=ResultData(data_array=[["id-sm", "h", None, None, None, "self-managed mem", None, None, None]]),
     )
     res = inst.get("id-sm")
@@ -570,6 +582,7 @@ def test_ensure_source_table_uses_dynamic_names(mock_workspace_client):
 def test_config_rejects_old_doc_params():
     """Config should reject the old documentation parameter names like index_name and source_table_name."""
     from mem0.configs.vector_stores.databricks import DatabricksConfig
+
     with pytest.raises(ValueError, match="Extra fields not allowed"):
         DatabricksConfig(
             workspace_url="https://test",
@@ -585,6 +598,7 @@ def test_config_rejects_old_doc_params():
 def test_config_rejects_source_table_name():
     """Config should reject source_table_name which was in old docs."""
     from mem0.configs.vector_stores.databricks import DatabricksConfig
+
     with pytest.raises(ValueError, match="Extra fields not allowed"):
         DatabricksConfig(
             workspace_url="https://test",
@@ -600,6 +614,7 @@ def test_config_rejects_source_table_name():
 def test_config_accepts_correct_params():
     """Config should accept all the correct parameter names."""
     from mem0.configs.vector_stores.databricks import DatabricksConfig
+
     config = DatabricksConfig(
         workspace_url="https://test",
         access_token="tok",
@@ -738,9 +753,7 @@ def test_e2e_crud_lifecycle_delta_sync(mock_workspace_client):
 
     # SEARCH
     mock_workspace_client.vector_search_indexes.query_index.return_value = SimpleNamespace(
-        result=SimpleNamespace(
-            data_array=[["mem-001", "h1", None, None, "u1", "test memory", None, None, None, 0.95]]
-        )
+        result=SimpleNamespace(data_array=[["mem-001", "h1", None, None, "u1", "test memory", None, None, None, 0.95]])
     )
     results = db.search(query="test", vectors=None, top_k=5)
     assert len(results) == 1
@@ -751,13 +764,19 @@ def test_e2e_crud_lifecycle_delta_sync(mock_workspace_client):
 
     # GET
     mock_workspace_client.vector_search_indexes.query_index.return_value = QueryVectorIndexResponse(
-        manifest=ResultManifest(columns=[
-            ColumnInfo(name="memory_id"), ColumnInfo(name="hash"),
-            ColumnInfo(name="agent_id"), ColumnInfo(name="run_id"),
-            ColumnInfo(name="user_id"), ColumnInfo(name="memory"),
-            ColumnInfo(name="metadata"), ColumnInfo(name="created_at"),
-            ColumnInfo(name="updated_at"),
-        ]),
+        manifest=ResultManifest(
+            columns=[
+                ColumnInfo(name="memory_id"),
+                ColumnInfo(name="hash"),
+                ColumnInfo(name="agent_id"),
+                ColumnInfo(name="run_id"),
+                ColumnInfo(name="user_id"),
+                ColumnInfo(name="memory"),
+                ColumnInfo(name="metadata"),
+                ColumnInfo(name="created_at"),
+                ColumnInfo(name="updated_at"),
+            ]
+        ),
         result=ResultData(data_array=[["mem-001", "h1", None, None, "u1", "test memory", None, None, None]]),
     )
     got = db.get("mem-001")
@@ -769,9 +788,7 @@ def test_e2e_crud_lifecycle_delta_sync(mock_workspace_client):
 
     # LIST
     mock_workspace_client.vector_search_indexes.query_index.return_value = SimpleNamespace(
-        result=SimpleNamespace(
-            data_array=[["mem-001", "h1", None, None, "u1", "test memory", None, None, None]]
-        )
+        result=SimpleNamespace(data_array=[["mem-001", "h1", None, None, "u1", "test memory", None, None, None]])
     )
     listed = db.list(filters={"user_id": "u1"}, top_k=10)
     assert len(listed[0]) == 1
@@ -841,7 +858,9 @@ def test_e2e_crud_lifecycle_direct_access(mock_workspace_client):
     # SEARCH with vector
     mock_workspace_client.vector_search_indexes.query_index.return_value = SimpleNamespace(
         result=SimpleNamespace(
-            data_array=[["mem-da-001", "h1", None, None, "u1", "direct memory", None, None, None, [0.1, 0.2, 0.3, 0.4], 0.9]]
+            data_array=[
+                ["mem-da-001", "h1", None, None, "u1", "direct memory", None, None, None, [0.1, 0.2, 0.3, 0.4], 0.9]
+            ]
         )
     )
     results = db.search(query="", vectors=[0.1, 0.2, 0.3, 0.4], top_k=5)
@@ -852,14 +871,23 @@ def test_e2e_crud_lifecycle_direct_access(mock_workspace_client):
 
     # GET — must use query_vector for DIRECT_ACCESS
     mock_workspace_client.vector_search_indexes.query_index.return_value = QueryVectorIndexResponse(
-        manifest=ResultManifest(columns=[
-            ColumnInfo(name="memory_id"), ColumnInfo(name="hash"),
-            ColumnInfo(name="agent_id"), ColumnInfo(name="run_id"),
-            ColumnInfo(name="user_id"), ColumnInfo(name="memory"),
-            ColumnInfo(name="metadata"), ColumnInfo(name="created_at"),
-            ColumnInfo(name="updated_at"), ColumnInfo(name="embedding"),
-        ]),
-        result=ResultData(data_array=[["mem-da-001", "h1", None, None, "u1", "direct memory", None, None, None, [0.1, 0.2, 0.3, 0.4]]]),
+        manifest=ResultManifest(
+            columns=[
+                ColumnInfo(name="memory_id"),
+                ColumnInfo(name="hash"),
+                ColumnInfo(name="agent_id"),
+                ColumnInfo(name="run_id"),
+                ColumnInfo(name="user_id"),
+                ColumnInfo(name="memory"),
+                ColumnInfo(name="metadata"),
+                ColumnInfo(name="created_at"),
+                ColumnInfo(name="updated_at"),
+                ColumnInfo(name="embedding"),
+            ]
+        ),
+        result=ResultData(
+            data_array=[["mem-da-001", "h1", None, None, "u1", "direct memory", None, None, None, [0.1, 0.2, 0.3, 0.4]]]
+        ),
     )
     got = db.get("mem-da-001")
     assert got.id == "mem-da-001"
@@ -958,12 +986,15 @@ def test_insert_prevents_sql_injection_in_payload_data(db_instance_delta, mock_w
     assert param_map["memory_0"] == malicious_data
 
 
-@pytest.mark.parametrize("malicious_key", [
-    "memory; DROP TABLE x--",
-    "col' OR '1'='1",
-    "valid_col; DELETE FROM t",
-    "col\nname",
-])
+@pytest.mark.parametrize(
+    "malicious_key",
+    [
+        "memory; DROP TABLE x--",
+        "col' OR '1'='1",
+        "valid_col; DELETE FROM t",
+        "col\nname",
+    ],
+)
 def test_update_rejects_malicious_column_names(db_instance_delta, mock_workspace_client, malicious_key):
     """Verify update() skips payload keys that are not valid SQL identifiers."""
     db_instance_delta.update(
@@ -1047,12 +1078,14 @@ def test_insert_timestamp_params_have_explicit_type(db_instance_delta, mock_work
     so Databricks doesn't rely on implicit STRING->TIMESTAMP casting."""
     db_instance_delta.insert(
         vectors=[[0.1, 0.2]],
-        payloads=[{
-            "data": "test",
-            "hash": "h1",
-            "created_at": "2024-01-01T00:00:00+00:00",
-            "updated_at": "2024-01-02T00:00:00+00:00",
-        }],
+        payloads=[
+            {
+                "data": "test",
+                "hash": "h1",
+                "created_at": "2024-01-01T00:00:00+00:00",
+                "updated_at": "2024-01-02T00:00:00+00:00",
+            }
+        ],
         ids=["id-1"],
     )
     kwargs = mock_workspace_client.statement_execution.execute_statement.call_args.kwargs

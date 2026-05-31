@@ -73,6 +73,7 @@ class TestInit:
         with patch.dict("os.environ", {}, clear=True):
             # Remove TURBOPUFFER_API_KEY if it exists
             import os
+
             os.environ.pop("TURBOPUFFER_API_KEY", None)
             with pytest.raises(ValueError, match="API key must be provided"):
                 TurbopufferDB(
@@ -305,9 +306,7 @@ class TestSearch:
         mock_response.rows = [_make_row("id1", dist=0.1, data="hello")]
         db.namespace.query.return_value = mock_response
 
-        results = db.search(
-            "query", [0.1, 0.2, 0.3, 0.4], top_k=5, filters={"user_id": "u1"}
-        )
+        results = db.search("query", [0.1, 0.2, 0.3, 0.4], top_k=5, filters={"user_id": "u1"})
 
         call_kwargs = db.namespace.query.call_args[1]
         assert call_kwargs["filters"] == ("user_id", "Eq", "u1")
@@ -645,6 +644,7 @@ class TestConfig:
 
         with patch.dict("os.environ", {}, clear=True):
             import os
+
             os.environ.pop("TURBOPUFFER_API_KEY", None)
             with pytest.raises(ValueError, match="api_key"):
                 TurbopufferConfig()

@@ -30,9 +30,9 @@ class TestRemoveSpacesFromEntities:
         assert remove_spaces_from_entities([{}, {}, {}], sanitize_relationship=sanitize) == []
 
     def test_skips_non_dict_entries(self):
-        assert remove_spaces_from_entities([None, "not-a-dict", 123, {"source": "a", "relationship": "r", "destination": "b"}]) == [
-            {"source": "a", "relationship": "r", "destination": "b"}
-        ]
+        assert remove_spaces_from_entities(
+            [None, "not-a-dict", 123, {"source": "a", "relationship": "r", "destination": "b"}]
+        ) == [{"source": "a", "relationship": "r", "destination": "b"}]
 
     def test_sanitize_true_relationship_uses_sanitizer(self):
         """Neo4j / Memgraph path: special characters mapped via sanitize_relationship_for_cypher."""

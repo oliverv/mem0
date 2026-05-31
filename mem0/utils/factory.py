@@ -47,6 +47,7 @@ class LlmFactory:
         "anthropic": ("mem0.llms.anthropic.AnthropicLLM", AnthropicConfig),
         "azure_openai_structured": ("mem0.llms.azure_openai_structured.AzureOpenAIStructuredLLM", AzureOpenAIConfig),
         "gemini": ("mem0.llms.gemini.GeminiLLM", BaseLlmConfig),
+        "google": ("mem0.llms.gemini.GeminiLLM", BaseLlmConfig),  # alias
         "deepseek": ("mem0.llms.deepseek.DeepSeekLLM", DeepSeekConfig),
         "minimax": ("mem0.llms.minimax.MiniMaxLLM", MinimaxConfig),
         "xai": ("mem0.llms.xai.XAILLM", XAIConfig),
@@ -144,6 +145,7 @@ class EmbedderFactory:
         "huggingface": "mem0.embeddings.huggingface.HuggingFaceEmbedding",
         "azure_openai": "mem0.embeddings.azure_openai.AzureOpenAIEmbedding",
         "gemini": "mem0.embeddings.gemini.GoogleGenAIEmbedding",
+        "google": "mem0.embeddings.gemini.GoogleGenAIEmbedding",  # alias
         "vertexai": "mem0.embeddings.vertexai.VertexAIEmbedding",
         "together": "mem0.embeddings.together.TogetherEmbedding",
         "lmstudio": "mem0.embeddings.lmstudio.LMStudioEmbedding",
@@ -210,7 +212,6 @@ class VectorStoreFactory:
         return instance
 
 
-
 class RerankerFactory:
     """
     Factory for creating reranker instances with appropriate configurations.
@@ -220,7 +221,10 @@ class RerankerFactory:
     # Provider mappings with their config classes
     provider_to_class = {
         "cohere": ("mem0.reranker.cohere_reranker.CohereReranker", CohereRerankerConfig),
-        "sentence_transformer": ("mem0.reranker.sentence_transformer_reranker.SentenceTransformerReranker", SentenceTransformerRerankerConfig),
+        "sentence_transformer": (
+            "mem0.reranker.sentence_transformer_reranker.SentenceTransformerReranker",
+            SentenceTransformerRerankerConfig,
+        ),
         "zero_entropy": ("mem0.reranker.zero_entropy_reranker.ZeroEntropyReranker", ZeroEntropyRerankerConfig),
         "llm_reranker": ("mem0.reranker.llm_reranker.LLMReranker", LLMRerankerConfig),
         "huggingface": ("mem0.reranker.huggingface_reranker.HuggingFaceReranker", HuggingFaceRerankerConfig),

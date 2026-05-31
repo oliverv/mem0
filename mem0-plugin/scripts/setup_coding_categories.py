@@ -62,8 +62,7 @@ CODING_CATEGORIES = [
     },
     {
         "user_preferences": (
-            "User's stated preferences for tools, libraries, languages, formatting, "
-            "and ways of working."
+            "User's stated preferences for tools, libraries, languages, formatting, " "and ways of working."
         )
     },
 ]

@@ -8,6 +8,7 @@ try:
 except ImportError:
     raise ImportError("FastEmbed is not installed.  Please install it using `pip install fastembed`")
 
+
 class FastEmbedEmbedding(EmbeddingBase):
     def __init__(self, config: Optional[BaseEmbedderConfig] = None):
         super().__init__(config)

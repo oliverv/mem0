@@ -420,7 +420,9 @@ def test_email_code_authenticates_without_persisting_credentials(tmp_path: Path)
     assert result.returncode == 0, result.stderr
     assert "Authenticated as alice@example.com" in result.stdout
 
-    verify_request = next(request for request in server.requests if request["path"] == "/api/v1/auth/email_code/verify/")
+    verify_request = next(
+        request for request in server.requests if request["path"] == "/api/v1/auth/email_code/verify/"
+    )
     assert verify_request["body"] == {"email": "alice@example.com", "code": "123456"}
     assert not any(request["path"] == "/api/v1/auth/email_code/" for request in server.requests)
 

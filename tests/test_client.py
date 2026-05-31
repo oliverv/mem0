@@ -13,12 +13,13 @@ def mock_memory_client():
         mock_http_client = MagicMock()
         mock_http_client.get.return_value = MagicMock(
             json=lambda: {"org_id": "org1", "project_id": "proj1", "user_email": "test@test.com"},
-            raise_for_status=lambda: None
+            raise_for_status=lambda: None,
         )
         mock_httpx.return_value = mock_http_client
 
         with patch("mem0.client.main.capture_client_event"):
             from mem0.client.main import MemoryClient
+
             client = MemoryClient(api_key="test-api-key")
             yield client
 
@@ -82,13 +83,11 @@ class TestFilterOperatorPassthrough:
     def test_search_passes_and_filters(self, mock_memory_client):
         """search() should pass AND filters to the API."""
         mock_memory_client.client.post.return_value = MagicMock(
-            json=lambda: {"results": []},
-            raise_for_status=lambda: None
+            json=lambda: {"results": []}, raise_for_status=lambda: None
         )
 
         mock_memory_client.search(
-            "test query",
-            filters={"AND": [{"user_id": "u1"}, {"created_at": {"gte": "2024-01-01"}}]}
+            "test query", filters={"AND": [{"user_id": "u1"}, {"created_at": {"gte": "2024-01-01"}}]}
         )
 
         # Verify the POST was called with filters intact
@@ -99,14 +98,10 @@ class TestFilterOperatorPassthrough:
     def test_search_passes_or_filters(self, mock_memory_client):
         """search() should pass OR filters to the API."""
         mock_memory_client.client.post.return_value = MagicMock(
-            json=lambda: {"results": []},
-            raise_for_status=lambda: None
+            json=lambda: {"results": []}, raise_for_status=lambda: None
         )
 
-        mock_memory_client.search(
-            "test query",
-            filters={"OR": [{"user_id": "u1"}, {"agent_id": "a1"}]}
-        )
+        mock_memory_client.search("test query", filters={"OR": [{"user_id": "u1"}, {"agent_id": "a1"}]})
 
         call_args = mock_memory_client.client.post.call_args
         payload = call_args.kwargs.get("json", call_args.args[1] if len(call_args.args) > 1 else {})
@@ -115,13 +110,11 @@ class TestFilterOperatorPassthrough:
     def test_search_passes_not_filters(self, mock_memory_client):
         """search() should pass NOT filters to the API."""
         mock_memory_client.client.post.return_value = MagicMock(
-            json=lambda: {"results": []},
-            raise_for_status=lambda: None
+            json=lambda: {"results": []}, raise_for_status=lambda: None
         )
 
         mock_memory_client.search(
-            "test query",
-            filters={"AND": [{"user_id": "u1"}, {"NOT": {"categories": {"in": ["spam"]}}}]}
+            "test query", filters={"AND": [{"user_id": "u1"}, {"NOT": {"categories": {"in": ["spam"]}}}]}
         )
 
         call_args = mock_memory_client.client.post.call_args
@@ -131,15 +124,14 @@ class TestFilterOperatorPassthrough:
     def test_search_passes_complex_nested_filters(self, mock_memory_client):
         """search() should pass complex nested AND/OR/NOT filters to the API."""
         mock_memory_client.client.post.return_value = MagicMock(
-            json=lambda: {"results": []},
-            raise_for_status=lambda: None
+            json=lambda: {"results": []}, raise_for_status=lambda: None
         )
 
         complex_filter = {
             "AND": [
                 {"user_id": "u1"},
                 {"created_at": {"gte": "2024-01-01"}},
-                {"NOT": {"OR": [{"categories": {"in": ["spam"]}}, {"categories": {"in": ["test"]}}]}}
+                {"NOT": {"OR": [{"categories": {"in": ["spam"]}}, {"categories": {"in": ["test"]}}]}},
             ]
         }
         mock_memory_client.search("test query", filters=complex_filter)

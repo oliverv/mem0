@@ -128,16 +128,12 @@ class TestEnsureJsonInstruction:
 
     def test_appended_instruction_mentions_facts_key(self):
         """The appended instruction should guide the model to use the 'facts' key."""
-        system, _ = ensure_json_instruction(
-            "Extract information.", "Input:\nuser: test"
-        )
+        system, _ = ensure_json_instruction("Extract information.", "Input:\nuser: test")
         assert "facts" in system.lower()
 
     def test_idempotent_when_already_has_json(self):
         """Calling ensure_json_instruction twice doesn't double-append."""
-        system1, user1 = ensure_json_instruction(
-            "Extract facts.", "Input:\nuser: test"
-        )
+        system1, user1 = ensure_json_instruction("Extract facts.", "Input:\nuser: test")
         system2, user2 = ensure_json_instruction(system1, user1)
         assert system1 == system2
         assert user1 == user2
@@ -173,8 +169,7 @@ class TestEnsureJsonInstruction:
             ("AGENT_MEMORY_EXTRACTION_PROMPT", AGENT_MEMORY_EXTRACTION_PROMPT),
         ]:
             assert "json" in prompt.lower(), (
-                f"{name} should contain 'json' — "
-                "if this fails, the default prompts have changed"
+                f"{name} should contain 'json' — " "if this fails, the default prompts have changed"
             )
             # ensure_json_instruction should be a no-op for defaults
             system, _ = ensure_json_instruction(prompt, "Input:\nuser: test")
@@ -183,4 +178,3 @@ class TestEnsureJsonInstruction:
     # -------------------------------------------------------------------
     # Integration: verify fix is wired into both sync and async paths
     # -------------------------------------------------------------------
-

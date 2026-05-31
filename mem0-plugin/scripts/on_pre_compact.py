@@ -171,9 +171,7 @@ def store_memory(api_key: str, content: str, user_id: str, source: str, session_
     """Store session state as a memory via the Mem0 REST API."""
     expires = (date.today() + timedelta(days=SESSION_STATE_EXPIRY_DAYS)).isoformat()
     body = {
-        "messages": [
-            {"role": "user", "content": content}
-        ],
+        "messages": [{"role": "user", "content": content}],
         "user_id": user_id,
         "metadata": {
             "type": "session_state",
