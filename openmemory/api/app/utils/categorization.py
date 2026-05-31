@@ -1,134 +1,80 @@
+"""
+Memory categorization using the configured LLM (provider-agnostic).
+
+Instead of calling OpenAI directly, we call get_memory_client() which already
+holds the user-configured LLM (xAI, Gemini, LiteLLM, Ollama, Vertex AI, etc.)
+and ask it to return JSON via a plain chat prompt.  This means categorization
+works with every provider mem0 supports.
+"""
+import json
 import logging
-import os
 from typing import List
 
 from app.utils.prompts import MEMORY_CATEGORIZATION_PROMPT
 from dotenv import load_dotenv
-from pydantic import BaseModel
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 load_dotenv()
-
 logger = logging.getLogger(__name__)
 
+_CATEGORIZE_SYSTEM = (
+    MEMORY_CATEGORIZATION_PROMPT.strip()
+    + "\n\nReturn ONLY valid JSON in the exact format: "
+    + '{"categories": ["cat1", "cat2"]}'
+    + "\nNo markdown, no explanation, just the JSON object."
+)
 
-class MemoryCategories(BaseModel):
-    categories: List[str]
 
-
-def _get_openai_client():
-    """
-    Lazily build an OpenAI-compatible client from the active LLM config in the DB.
-    Falls back to a plain OpenAI client using OPENAI_API_KEY if anything goes wrong.
-    Providers supported for structured-output categorization:
-      openai, xai, deepseek, groq, together, mistralai (all expose an OpenAI-compat API).
-    For providers that don't (anthropic, gemini, ollama, etc.) we fall back to OpenAI.
-    """
-    # Providers that speak the OpenAI chat-completions wire protocol
-    OPENAI_COMPAT_PROVIDERS = {"openai", "xai", "deepseek", "groq", "together", "mistralai", "litellm"}
-
+def _parse_categories(raw: str) -> List[str]:
+    """Extract categories list from a raw LLM response string."""
+    raw = raw.strip()
+    # Strip markdown code fences if present
+    if raw.startswith("```"):
+        lines = raw.splitlines()
+        raw = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
     try:
-        from openai import OpenAI
-        from app.database import SessionLocal
-        from app.models import Config as ConfigModel
-
-        db = SessionLocal()
-        try:
-            db_config = db.query(ConfigModel).filter(ConfigModel.key == "main").first()
-        finally:
-            db.close()
-
-        if db_config and "mem0" in db_config.value:
-            llm_cfg = db_config.value["mem0"].get("llm", {})
-            provider = (llm_cfg.get("provider") or "openai").lower()
-            cfg = llm_cfg.get("config", {})
-
-            # Resolve env: references
-            def _resolve(val):
-                if isinstance(val, str) and val.startswith("env:"):
-                    return os.environ.get(val[4:], "")
-                return val
-
-            api_key = _resolve(cfg.get("api_key"))
-            base_url = None
-
-            if provider in OPENAI_COMPAT_PROVIDERS:
-                if provider == "xai":
-                    base_url = cfg.get("xai_base_url") or os.environ.get("XAI_API_BASE") or "https://api.x.ai/v1"
-                    api_key = api_key or os.environ.get("XAI_API_KEY")
-                elif provider == "deepseek":
-                    base_url = cfg.get("deepseek_base_url") or "https://api.deepseek.com"
-                elif provider == "groq":
-                    base_url = "https://api.groq.com/openai/v1"
-                elif provider == "together":
-                    base_url = "https://api.together.xyz/v1"
-
-                if api_key:
-                    return OpenAI(api_key=api_key, base_url=base_url), provider
-    except Exception as e:
-        logger.debug(f"[categorization] Could not load LLM config from DB: {e}")
-
-    # Fallback: plain OpenAI
-    from openai import OpenAI
-    return OpenAI(), "openai"
-
-
-def _get_model_for_provider(provider: str, cfg: dict) -> str:
-    """Pick an appropriate model name for structured-output categorization."""
-    model = cfg.get("model", "")
-    if model:
-        return model
-    defaults = {
-        "xai": "grok-2-latest",
-        "deepseek": "deepseek-chat",
-        "groq": "llama3-8b-8192",
-        "together": "mistralai/Mixtral-8x7B-Instruct-v0.1",
-        "openai": "gpt-4o-mini",
-    }
-    return defaults.get(provider, "gpt-4o-mini")
+        data = json.loads(raw)
+        cats = data.get("categories", [])
+        return [c.strip().lower() for c in cats if isinstance(c, str)]
+    except json.JSONDecodeError:
+        # Last-ditch: try to find a JSON object anywhere in the string
+        import re
+        m = re.search(r'\{.*?"categories"\s*:\s*\[.*?\]\s*\}', raw, re.DOTALL)
+        if m:
+            try:
+                data = json.loads(m.group(0))
+                cats = data.get("categories", [])
+                return [c.strip().lower() for c in cats if isinstance(c, str)]
+            except json.JSONDecodeError:
+                pass
+        logger.warning("[categorization] Could not parse JSON from LLM response: %s", raw[:200])
+        return []
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15))
 def get_categories_for_memory(memory: str) -> List[str]:
+    """
+    Categorize a memory string using the currently configured LLM.
+    Works with any provider (xAI, Gemini, LiteLLM, Vertex AI, Ollama, OpenAI, etc.)
+    """
     try:
-        client, provider = _get_openai_client()
+        from app.utils.memory import get_memory_client
+        client = get_memory_client()
 
-        # Resolve model from DB config where possible
-        model = "gpt-4o-mini"
-        try:
-            from app.database import SessionLocal
-            from app.models import Config as ConfigModel
-            db = SessionLocal()
-            try:
-                db_config = db.query(ConfigModel).filter(ConfigModel.key == "main").first()
-            finally:
-                db.close()
-            if db_config and "mem0" in db_config.value:
-                llm_cfg = db_config.value["mem0"].get("llm", {})
-                model = _get_model_for_provider(provider, llm_cfg.get("config", {}))
-        except Exception:
-            pass
+        if client is None:
+            logger.warning("[categorization] Memory client unavailable, skipping categorization")
+            return []
+
+        llm = client.llm  # the underlying LLMBase instance
 
         messages = [
-            {"role": "system", "content": MEMORY_CATEGORIZATION_PROMPT},
+            {"role": "system", "content": _CATEGORIZE_SYSTEM},
             {"role": "user", "content": memory},
         ]
 
-        completion = client.beta.chat.completions.parse(
-            model=model,
-            messages=messages,
-            response_format=MemoryCategories,
-            temperature=0,
-        )
-
-        parsed: MemoryCategories = completion.choices[0].message.parsed
-        return [cat.strip().lower() for cat in parsed.categories]
+        raw = llm.generate_response(messages)
+        return _parse_categories(raw)
 
     except Exception as e:
-        logger.error(f"[categorization] Failed to get categories: {e}")
-        try:
-            # noinspection PyUnboundLocalVariable
-            logger.debug(f"[categorization] Raw response: {completion.choices[0].message.content}")
-        except Exception:
-            pass
+        logger.error("[categorization] Failed to get categories: %s", e)
         raise
