@@ -1,0 +1,42 @@
+# Local dev compose — builds API and UI from source
+services:
+  mem0_store:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/mem0/storage
+
+  openmemory-mcp:
+    build:
+      context: ..
+      dockerfile: openmemory/api/dev.Dockerfile
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - XAI_API_KEY=${XAI_API_KEY:-}
+      - USER=${USER:-default_user}
+      - QDRANT_HOST=mem0_store
+      - QDRANT_PORT=6333
+    depends_on:
+      - mem0_store
+    ports:
+      - "8765:8765"
+    volumes:
+      - openmemory_db:/usr/src/openmemory
+
+  openmemory-ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8765}
+      - NEXT_PUBLIC_USER_ID=${NEXT_PUBLIC_USER_ID:-${USER:-default_user}}
+    depends_on:
+      - openmemory-mcp
+    ports:
+      - "${FRONTEND_PORT:-3001}:3000"
+
+volumes:
+  qdrant_data:
+  openmemory_db:
